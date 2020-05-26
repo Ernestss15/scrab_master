@@ -1,0 +1,178 @@
+import speech_recognition as sr
+
+# pip install SpeechRecognition
+# pip install pyaudio
+
+
+
+
+
+
+def speech():
+    aux = False
+    word = ""
+    row = ""
+    col = ""
+    orientation = ""
+    while (not aux):
+        #print ('Please say "WORD, and the word you would like to put')
+        print('Por favor diga "WORD", y la palabra que le gustaria poner')
+        #raw_input("Press Enter to continue...")
+        #print ("Listening")
+        print("Escuchando")
+        text = escuchar()
+        aux, word = comprovar_comando_word(text)
+    aux = False
+    print("OK, I got it!")
+    while (not aux):
+        #print ('Please say "COLUMN", and the coord X" and say "ROW", and the coord Y')
+        print('Por favor diga "COLUMN", y la coord X" y diga "ROW", y la coord Y')
+        #raw_input("Press Enter to continue...")
+        #print ("Listening")
+        print("Escuchando")
+        text = escuchar()
+        aux, row, col = comprovar_comando_coord(text)
+    aux = False
+    print("OK, I got it!")
+    while (not aux):
+        #print ('Please say "ORIENTATION", and vertical or horizontal')
+        print('Por favor diga "ORIENTATION", y vertical u horizontal')
+        #raw_input("Press Enter to continue...")
+        #print ("Listening")
+        print("Escuchando")
+        text = escuchar()
+        aux, orientation = comprovar_comando_orientation(text)
+    word, row, col, orientation = adaptar_parametros(word, row, col, orientation)
+    return word, row, col, orientation
+
+def escuchar():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        audio = r.listen(source)
+        try:
+            text = r.recognize_google(audio)
+            text = text.upper()
+            #print ('You said : {}'.format(text))
+        except:
+            #print('Sorry I cant hear your voice well')
+            print('Lo siento, no puedo escuchar bien tu voz')
+            text = "-1"
+    return text
+def comprovar_comando_word(text):
+    L = text.split()
+    word = ""
+    for x in range(0, len(L)):
+        if (L[x] == "WORD" or L[x] == "WORTH" or L[x] == "WARD" or L[x] == "WHAT" or L[x] == "WAR") and x != len(L)-1:
+            word = L[x + 1]
+            print ("WORD: ", L[x + 1])
+    if word == "":
+        aux = False
+        #print("I can't hear the command ""WORD"" clearly, try it again...")
+        print("No puedo escuchar el comando "" WORD "" claramente, intentalo de nuevo ...")
+    else:
+        aux = comprovar_diccionario(word)
+    return aux, word
+def comprovar_comando_coord(text):
+    L = text.split()
+    col = ""
+    row = ""
+    for x in range(0, len(L)):
+        if (L[x] == "ROW" or L[x] == "RUE" or L[x] == "GROW") and x != len(L)-1:
+            row = L[x + 1]
+            print ("ROW: ", L[x + 1])
+        if (L[x] == "COLUMN" or L[x] == "COLOGNE") and x != len(L)-1:
+            col = L[x + 1]
+            print ("COLUMN ", L[x + 1])
+    if row == "":
+        aux = False
+        #print("I can't hear the command ""ROW"" clearly, try it again...")
+        print("No puedo escuchar el comando "" ROW "" claramente, intentalo de nuevo ...")
+    if col == "":
+        aux = False
+        #print("I can't hear the command ""COLUMN"" clearly, try it again...")
+        print("No puedo escuchar el comando ""COLUMN"" claramente, intentalo de nuevo ...")
+    if row is not "" and col is not "":
+        aux = comprovar_parametros(col, row)
+    return aux, row, col
+def comprovar_comando_orientation(text):
+    L = text.split()
+    orientation = ""
+    for x in range(0, len(L)):
+        if L[x] == "ORIENTATION" and x != len(L)-1:
+            orientation = L[x + 1]
+            print ("ORIENTATION: ", L[x + 1])
+    if orientation == "":
+        aux = False
+        #print("I can't hear the command ""ORIENTATION"" clearly, try it again...")
+        print("No puedo escuchar el comando ""ORIENTATION"" claramente, intentalo de nuevo ...")
+    else:
+        aux = comprovar_orientacion(orientation)
+    return aux, orientation
+def comprovar_orientacion(orientation):
+    aux = False
+    if orientation == "VERTICAL" or orientation == "HORIZONTAL":
+        aux = True
+        #print("O correct")
+    return aux
+def comprovar_parametros(column, row):
+    aux = False
+    try :
+        if column == "A" or column == "B" or column == "C" or column == "D" or column == "E" or column == "V" or column == "FOR" :
+            aux = True
+            #print("C correct")
+            if column == "V":
+                column = "B"
+            if column == "FOR":
+                column = "4"
+
+        else:
+            if int(column) in range(1, 9):
+                aux = True
+                #print("C correct")
+        if row == "A" or row == "B" or row == "C" or row == "D" or row == "E" or row == "V" or column == "FOR" :
+            aux = True
+            #print("R correct")
+            if row == "V":
+                row = "B"
+            if row == "FOR":
+                row = "4"
+        else:
+            if int(row) in range(1, 9):
+                aux = True
+                #print("R correct")
+    except:
+        aux = False
+        #print("FAIL")
+    return aux
+def adaptar_parametros(word, row, col, orientation):
+    word = word.lower()
+    row = row.lower()
+    col = col.lower()
+    if orientation == "VERTICAL":
+        orientation = "A"
+    else:
+        orientation = "D"
+
+    return word, row, col, orientation
+def comprovar_diccionario(word):
+
+    s = " "
+    finded = False
+    fh = open("data/diccionario", "r")
+    while (s):
+        s = fh.readline()
+        L = s.split()
+        if word in L:
+            #print ('The word', word, 'exists in the dictionary')
+            print ('La palabra', word, 'existe en el diccionario')
+            finded = True
+
+    if not finded:
+        #print ('The word', word, 'doesnt exist in the dictionary')
+        print ('La palabra', word, 'no existe en el diccionario')
+    return finded
+
+
+if __name__ == "__main__":
+    list = speech()
+    print(list)
